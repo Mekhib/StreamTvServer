@@ -1,6 +1,4 @@
 import httpx
-from fastapi import HTTPException
-from async_lru import alru_cache
 from app.config import settings
 
 class TMDBService:
@@ -8,17 +6,10 @@ class TMDBService:
         self.headers = {"Authorization": f"Bearer {settings.TMDB_API_TOKEN}", "accept": "application/json"}
         self.client = httpx.AsyncClient(base_url=settings.TMDB_BASE_URL, headers=self.headers, timeout=10.0)
 
-async def get_trending(self, media_type: str):
-    headers = {
-        "Authorization": f"Bearer {settings.TMDB_API_TOKEN}",
-        "Accept": "application/json"
-    }
-    url = f"https://api.themoviedb.org/3/trending/{media_type}/day"
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(url, headers=headers)
-        # Add this print to verify what's being sent if it still fails
-        if resp.status_code == 401:
-            print(f"DEBUG: Failed with headers: {headers}")
+    # Indent this method inside the class!
+    async def get_trending(self, media_type: str):
+        url = f"https://api.themoviedb.org/3/trending/{media_type}/day"
+        resp = await self.client.get(url) # Use self.client already defined in __init__
         resp.raise_for_status()
         return resp.json()
 
