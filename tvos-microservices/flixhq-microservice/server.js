@@ -2,6 +2,10 @@ import express from 'express';
 import { MOVIES } from 'flixhq-core';
 import cors from 'cors';
 
+import { File, Blob } from 'node:buffer';
+global.File = File;
+global.Blob = Blob;
+
 const app = express();
 app.use(cors());
 const flixhq = new MOVIES.FlixHQ();
