@@ -1,3 +1,4 @@
+import traceback
 import httpx
 from moviebox_api.v2.core import Search
 from moviebox_api.v1.requests import Session  # Make sure to import this
@@ -7,13 +8,15 @@ class MovieBoxService:
     def __init__(self):
         self.session = Session()
 
-    async def search(self, query: str):
+async def search(self, query: str):
         try:
             search_worker = Search(self.session, query)
             results = await search_worker.search()
             return [{"id": r.id, "title": r.title, "type": "movie"} for r in results]
         except Exception as e:
-            print(f"MovieBox Search Error: {e}")
+            # This will print the full traceback to your Render logs
+            print("--- MOVIEBOX ERROR ---")
+            traceback.print_exc() 
             return []
 
     async def get_streams(self, media_id: int):
@@ -31,10 +34,19 @@ class FlixHQService:
     def __init__(self):
         self.base_url = settings.FLIXHQ_SERVICE_URL
 
-    async def search(self, query: str):
+async def search(self, query: str):
         async with httpx.AsyncClient() as client:
-            resp = await client.get(f"{self.base_url}/search", params={"query": query})
-            return resp.json().get("results", []) if resp.status_code == 200 else []
+            try:
+                resp = await client.get(f"{self.base_url}/search", params={"query": query})
+                if resp.status_code != 200:
+                    print(f"--- FLIXHQ ERROR: Status {resp.status_code} ---")
+                    print(f"Response: {resp.text}")
+                    return []
+                return resp.json().get("results", [])
+            except Exception as e:
+                print("--- FLIXHQ CONNECTION ERROR ---")
+                traceback.print_exc()
+                return []
 
     async def get_info(self, media_id: str):
         async with httpx.AsyncClient() as client:
