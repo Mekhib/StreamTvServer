@@ -4,21 +4,41 @@ from app.config import settings
 
 class MovieBoxService:
     def __init__(self):
-        self.api = Search()
+        # 1. Create a persistent session for the moviebox library to use
+        self.session = httpx.AsyncClient(timeout=15.0)
 
     async def search(self, query: str):
         try:
-            results = await self.api.search(query)
-            return [{"id": r.id, "title": r.title, "type": getattr(r, 'release_date', 'Unknown Year')} for r in results]
-        except Exception:
+            # 2. Instantiate Search with the required session and query per request
+            search_worker = Search(self.session, query)
+            
+            # The library likely returns the results via a property or a fetch/search method
+            # We use a safe fallback to catch how the new version returns data
+            if hasattr(search_worker, 'search'):
+                results = await search_worker.search()
+            elif hasattr(search_worker, 'fetch'):
+                results = await search_worker.fetch()
+            else:
+                results = await search_worker.get_results()
+
+            return [{"id": r.id, "title": getattr(r, 'title', 'Unknown'), "type": getattr(r, 'release_date', 'Unknown Year')} for r in results]
+        except Exception as e:
+            print(f"MovieBox Search Error: {e}")
             return []
 
     async def get_streams(self, media_id: int):
         try:
-            stream_data = await self.api.get_stream_urls(media_id)
+            # Pass a dummy query to satisfy the __init__ requirement so we can access the stream methods
+            search_worker = Search(self.session, "")
+            stream_data = await search_worker.get_stream_urls(media_id)
+            
             url = getattr(stream_data, 'best_quality_url', None) or stream_data.get('url')
+            if not url:
+                return []
+                
             return [{"server": "MovieBox Server 1", "sources": [{"url": url, "quality": "auto"}]}]
-        except Exception:
+        except Exception as e:
+            print(f"MovieBox Stream Error: {e}")
             return []
 
 class FlixHQService:
