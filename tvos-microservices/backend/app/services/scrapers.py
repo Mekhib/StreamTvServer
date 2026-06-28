@@ -1,12 +1,13 @@
 import httpx
 from moviebox_api.v2.core import Search
+from moviebox_api.v1.requests import Session  # Make sure to import this
 from app.config import settings
 
 class MovieBoxService:
     def __init__(self):
         self.session = Session()
 
-async def search(self, query: str):
+    async def search(self, query: str):
         try:
             search_worker = Search(self.session, query)
             results = await search_worker.search()
@@ -17,7 +18,7 @@ async def search(self, query: str):
 
     async def get_streams(self, media_id: int):
         try:
-            # We must still pass a dummy query to satisfy the __init__ requirements
+            # We must still pass a dummy query to satisfy the requirements
             search_worker = Search(self.session, "")
             stream_data = await search_worker.get_stream_urls(media_id)
             url = getattr(stream_data, 'best_quality_url', None) or stream_data.get('url')
@@ -45,6 +46,6 @@ class FlixHQService:
             resp = await client.get(f"{self.base_url}/sources", params={"mediaId": media_id, "episodeId": episode_id})
             return resp.json().get("sources", [])
 
-# Ensure these are initialized properly
+# Initialize clients
 moviebox_client = MovieBoxService()
 flixhq_client = FlixHQService()
