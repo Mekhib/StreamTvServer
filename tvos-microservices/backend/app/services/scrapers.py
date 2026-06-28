@@ -1,20 +1,19 @@
 import traceback
 import httpx
 from moviebox_api.v2.core import Search
-from moviebox_api.v1.requests import Session  # Make sure to import this
+from moviebox_api.v1.requests import Session 
 from app.config import settings
 
 class MovieBoxService:
     def __init__(self):
         self.session = Session()
 
-async def search(self, query: str):
+    async def search(self, query: str):
         try:
             search_worker = Search(self.session, query)
             results = await search_worker.search()
             return [{"id": r.id, "title": r.title, "type": "movie"} for r in results]
         except Exception as e:
-            # This will print the full traceback to your Render logs
             print("--- MOVIEBOX ERROR ---")
             traceback.print_exc() 
             return []
@@ -34,7 +33,7 @@ class FlixHQService:
     def __init__(self):
         self.base_url = settings.FLIXHQ_SERVICE_URL
 
-async def search(self, query: str):
+    async def search(self, query: str):
         async with httpx.AsyncClient() as client:
             try:
                 resp = await client.get(f"{self.base_url}/search", params={"query": query})
