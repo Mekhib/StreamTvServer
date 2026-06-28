@@ -4,16 +4,13 @@ from app.config import settings
 
 class MovieBoxService:
     def __init__(self):
-        # We initialize the session here, but NOT the Search class yet
-        self.session = httpx.AsyncClient(timeout=15.0)
+        self.session = Session()
 
-    async def search(self, query: str):
+async def search(self, query: str):
         try:
-            # Instantiate Search per-request, passing session and query
             search_worker = Search(self.session, query)
-            # The library v0.5.4+ uses .search()
             results = await search_worker.search()
-            return [{"id": r.id, "title": r.title, "type": getattr(r, 'release_date', 'Unknown Year')} for r in results]
+            return [{"id": r.id, "title": r.title, "type": "movie"} for r in results]
         except Exception as e:
             print(f"MovieBox Search Error: {e}")
             return []
