@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  fastapi-backend:
+    build: ./backend
+    container_name: tvos-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - TMDB_API_TOKEN=${TMDB_API_TOKEN}
+      - FLIXHQ_SERVICE_URL=http://flixhq-service:3000
+    depends_on:
+      - flixhq-service
+    restart: always
+
+  flixhq-service:
+    build: ./flixhq-microservice
+    container_name: tvos-flixhq-node
+    expose:
+      - "3000"
+    restart: always
+env_file:
+      - .env
