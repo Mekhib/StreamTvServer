@@ -1,10 +1,10 @@
 import httpx
-from moviebox_api.v2.core import SearchV2
+from moviebox_api.v2.core import Search
 from app.config import settings
 
 class MovieBoxService:
     def __init__(self):
-        self.api = SearchV2()
+        self.api = Search()
 
     async def search(self, query: str):
         try:
