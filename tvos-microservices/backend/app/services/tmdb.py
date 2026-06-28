@@ -4,7 +4,7 @@ from app.config import settings
 class TMDBService:
     def __init__(self):
       
-        self.api_key = settings.TMDB_API_KEY 
+        self.api_key = settings.TMDB_API_TOKEN
         self.params = {"api_key": self.api_key, "language": "en-US"}
         self.client = httpx.AsyncClient(base_url=settings.TMDB_BASE_URL, timeout=10.0)
 
