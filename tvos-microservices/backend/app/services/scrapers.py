@@ -11,6 +11,7 @@ class MovieBoxService:
     async def search(self, query: str):
         try:
             search_worker = Search(self.session, query)
+            print(f"--- MOVIEBOX METHODS ---: {dir(search_worker)}")
             results = await search_worker.search()
             return [{"id": r.id, "title": r.title, "type": "movie"} for r in results]
         except Exception as e:
