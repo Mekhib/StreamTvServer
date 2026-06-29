@@ -8,7 +8,7 @@ class MovieBoxService:
     def __init__(self):
         self.session = Session()
 
-async def search(self, query: str):
+    async def search(self, query: str):
         try:
             search_worker = Search(self.session, query)
             # Use the correct method found in dir()
