@@ -8,15 +8,17 @@ class MovieBoxService:
     def __init__(self):
         self.session = Session()
 
-    async def search(self, query: str):
+async def search(self, query: str):
         try:
             search_worker = Search(self.session, query)
-            print(f"--- MOVIEBOX METHODS ---: {dir(search_worker)}")
-            results = await search_worker.search()
+            # Use the correct method found in dir()
+            results = await search_worker.get_content()
+            
+            # The API returns a list/iterable of content models
             return [{"id": r.id, "title": r.title, "type": "movie"} for r in results]
         except Exception as e:
             print("--- MOVIEBOX ERROR ---")
-            traceback.print_exc() 
+            traceback.print_exc()
             return []
 
     async def get_streams(self, media_id: int):
